@@ -1,0 +1,314 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Update tombol export dan tambahkan modal -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="fas fa-file-pdf"></i> Export Laporan Bulanan
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Pemilihan Bulan -->
+    <div class="modal fade" id="exportModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pilih Bulan untuk Export Laporan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="exportForm" action="{% url 'admin_dashboard:export_monthly_reservations' %}" method="get">
+                        <div class="mb-3">
+                            <label class="form-label">Pilih Bulan dan Tahun</label>
+                            <input type="month" class="form-control" name="selected_date" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" form="exportForm" class="btn btn-primary">Export PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Trend Pembuatan Reservasi (30 Hari Terakhir)</h5>
+            <canvas id="reservationChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Reservasi</h5>
+                    <p class="card-text" id="total-reservations">{{ total_reservations }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Dalam Perbaikan</h5>
+                    <p class="card-text" id="ongoing-repairs">{{ ongoing_repairs }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Selesai</h5>
+                    <p class="card-text" id="completed-repairs">{{ completed_repairs }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Daftar Reservasi</h5>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>No. Telepon</th>
+                            <th>Tanggal</th>
+                            <th>Waktu</th>
+                            <th>Status</th>
+                            <th>Pembayaran</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservation-table">
+                        {% include 'dashboard/_reservation_table.html' %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="paymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Input Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nominal Pembayaran (Rp)</label>
+                            <input type="number" class="form-control" name="nominal_pembayaran" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitPayment">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    $(document).ready(function() {
+        let currentReservationId = null;
+        let currentCsrfToken = null;
+
+        $(document).on('click', '.payment-btn', function(e) {
+            e.preventDefault();
+            currentReservationId = $(this).data('reservation-id');
+            currentCsrfToken = $(this).data('csrf-token');
+            
+            // Set current payment value if it exists
+            const currentPayment = $(this).data('current-payment');
+            if (currentPayment) {
+                $('#paymentForm input[name="nominal_pembayaran"]').val(currentPayment);
+                $('.modal-title').text('Edit Pembayaran');
+            } else {
+                $('#paymentForm input[name="nominal_pembayaran"]').val('');
+                $('.modal-title').text('Input Pembayaran');
+            }
+            
+            $('#paymentModal').modal('show');
+        });
+
+        // Update the form submission
+        $('#submitPayment').click(function() {
+            const nominal = $('#paymentForm input[name="nominal_pembayaran"]').val();
+            
+            if (!nominal || nominal <= 0) {
+                alert('Mohon masukkan nominal pembayaran yang valid');
+                return;
+            }
+
+            const $button = $(this);
+            const originalText = $button.text();
+            $button.prop('disabled', true).text('Menyimpan...');
+            
+            $.ajax({
+                url: `/admin_dashboard/update-payment/${currentReservationId}/`,
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': currentCsrfToken
+                },
+                data: {
+                    nominal_pembayaran: nominal
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#paymentModal').modal('hide');
+                        updateReservationTable();
+                        alert('Pembayaran berhasil diperbarui');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error updating payment: ' + (xhr.responseJSON?.message || 'Unknown error'));
+                },
+                complete: function() {
+                    $button.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+
+        // Reset form when modal is closed
+        $('#paymentModal').on('hidden.bs.modal', function() {
+            $('#paymentForm')[0].reset();
+        });
+        
+        
+        const ctx = document.getElementById('reservationChart').getContext('2d');
+        const reservationChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ reservation_dates|safe }}'),
+                datasets: [{
+                    label: 'Jumlah Reservasi',
+                    data: JSON.parse('{{ reservation_counts|safe }}'),
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Trend Pembuatan Reservasi'
+                    }
+                }
+            }
+        });
+
+        // Update chart data with new reservations
+        function updateReservationTable() {
+            $.get("{% url 'admin_dashboard:check_reservations' %}", function(data) {
+                $("#reservation-table").html(data.reservation_html);
+                $("#total-reservations").text(data.total_reservations);
+                $("#ongoing-repairs").text(data.ongoing_repairs);
+                $("#completed-repairs").text(data.completed_repairs);
+                
+                // Update chart if new data is available
+                if (data.reservation_dates && data.reservation_counts) {
+                    reservationChart.data.labels = JSON.parse(data.reservation_dates);
+                    reservationChart.data.datasets[0].data = JSON.parse(data.reservation_counts);
+                    reservationChart.update();
+                }
+                
+                bindStatusButtons();
+            }).fail(function(xhr, status, error) {
+                console.error("Error updating table:", error);
+            });
+        }
+
+        function bindStatusButtons() {
+            $('.complete-btn, .edit-btn').off('click').on('click', function(e) {
+                e.preventDefault();
+                const button = $(this);
+                const reservationId = button.data('reservation-id');
+                const csrfToken = button.data('csrf-token');
+                const currentStatus = button.data('current-status');
+                const spinner = button.find('.spinner-border');
+                const buttonText = button.find('.button-text');
+
+                let confirmMessage;
+                let endpoint;
+
+                if (currentStatus === 'Selesai') {
+                    confirmMessage = 'Apakah Anda ingin mengedit status reservasi kembali ke Dalam Perbaikan?';
+                    endpoint = `/admin_dashboard/edit-status/${reservationId}/`;
+                } else {
+                    confirmMessage = 'Apakah Anda yakin ingin menandai reservasi ini sebagai selesai?';
+                    endpoint = `/admin_dashboard/mark-as-complete/${reservationId}/`;
+                }
+
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                button.prop('disabled', true);
+                spinner.removeClass('d-none');
+                buttonText.addClass('d-none');
+
+                $.ajax({
+                    url: endpoint,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            updateReservationTable();
+                            alert(response.message);
+                        } else {
+                            alert('Error: ' + response.message);
+                            button.prop('disabled', false);
+                            spinner.addClass('d-none');
+                            buttonText.removeClass('d-none');
+                        }
+                    },
+                    error: function(xhr) {
+                        const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : 'Terjadi kesalahan dalam memproses permintaan.';
+                        alert(errorMsg);
+                        console.error('Error:', xhr.responseText);
+                        button.prop('disabled', false);
+                        spinner.addClass('d-none');
+                        buttonText.removeClass('d-none');
+                    }
+                });
+            });
+        }
+
+        bindStatusButtons();
+        setInterval(updateReservationTable, 30000);
+    });
+</script>
+{% endblock %}

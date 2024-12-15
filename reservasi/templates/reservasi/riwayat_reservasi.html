@@ -1,0 +1,234 @@
+{% extends "base_reservasi.html" %}
+{% load humanize %}
+
+{% block title %}Riwayat Reservasi - Central Cool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 offset-lg-1">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Riwayat Reservasi</h2>
+                {% if reservations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Waktu</th>
+                                    <th>Layanan</th>
+                                    <th>Status</th>
+                                    <th>Pembayaran</th>
+                                    <th>Waktu Pembuatan</th>
+                                    <th>Waktu Update Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reservasi in reservations %}
+                                <tr>
+                                    <td>{{ reservasi.tanggal }}</td>
+                                    <td>{{ reservasi.waktu }}</td>
+                                    <td>{{ reservasi.layanan }}</td>
+                                    <td>
+                                        {% if reservasi.is_cancelled %}
+                                            <span class="badge bg-danger">Dibatalkan</span>
+                                        {% else %}
+                                            {% if reservasi.status == 'Dalam Perbaikan' %}
+                                                <span class="badge bg-dalam-perbaikan">{{ reservasi.status }}</span>
+                                            {% elif reservasi.status == 'Selesai' %}
+                                                <span class="badge bg-selesai">{{ reservasi.status }}</span>
+                                                {% else %}
+                                                <span class="badge bg-{{ reservasi.status|lower }}">{{ reservasi.status }}</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reservasi.status == 'Selesai' %}
+                                            {% if reservasi.nominal_pembayaran %}
+                                                <span class="badge bg-info">Rp {{ reservasi.nominal_pembayaran|floatformat:0|intcomma }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Menunggu Input Admin</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ reservasi.created_at|date:"d/m/Y H:i:s" }}</td>
+                                    <td>
+                                        {% if reservasi.status_updated_at %}
+                                            {{ reservasi.status_updated_at|date:"d/m/Y H:i:s" }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">Anda belum memiliki riwayat reservasi.</p>
+                {% endif %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{% url 'buat_reservasi' %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i> Buat Reservasi Baru
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Status badges styling */
+    .badge.bg-dalam-perbaikan {
+        background-color: #ffd700 !important;
+        color: #000;
+    }
+    
+    .badge.bg-selesai {
+        background-color: #28a745 !important;
+        color: #fff;
+    }
+    
+    /* Vintage notification styling */
+    .vintage-notification {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        font-family: 'Georgia', serif;
+    }
+    
+    .vintage-notification .notification-header h4 {
+        color: #2c3e50;
+        border-bottom: 2px solid #bdc3c7;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+    }
+    
+    .vintage-notification .notification-body {
+        padding: 1rem 0;
+    }
+    
+    .vintage-notification .notification-details {
+        background: rgba(255, 255, 255, 0.8);
+        border-left: 4px solid #3498db;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .vintage-notification .notification-details ul {
+        list-style: none;
+        padding-left: 1rem;
+    }
+    
+    .vintage-notification .notification-details li {
+        margin-bottom: 0.5rem;
+        color: #34495e;
+    }
+    
+    .vintage-notification .notification-action {
+        background: #edf2f7;
+        border-radius: 6px;
+        padding: 1rem;
+        margin: 1rem 0;
+        text-align: center;
+    }
+    
+    .vintage-notification .action-text {
+        color: #2c3e50;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .vintage-notification .notification-footer {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px dashed #bdc3c7;
+        font-style: italic;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    /* Table styling */
+    .table {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .table thead th {
+        background: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        color: #2c3e50;
+        font-family: 'Georgia', serif;
+        font-weight: normal;
+        letter-spacing: 1px;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* Button styling */
+    .btn {
+        border-radius: 4px;
+        font-family: 'Georgia', serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* Card styling */
+    .card {
+        border: none;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .card-title {
+        font-family: 'Georgia', serif;
+        color: #2c3e50;
+        letter-spacing: 1px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .badge.bg-info {
+        background-color: #17a2b8 !important;
+        color: white;
+        font-size: 0.9rem;
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .payment-info {
+        font-family: 'Georgia', serif;
+        background-color: #f8f9fa;
+        border-left: 4px solid #17a2b8;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-radius: 4px;
+    }
+
+    .payment-amount {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/ratings.css' %}">
+<style>
+.rating-stars {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.rating-stars input {
+    display: none;
+}
+
+.rating-stars label {
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0 0.2em;
+    color: #ddd;
+}
+
+.rating-stars label:hover,
+.rating-stars label:hover ~ label,
+.rating-stars input:checked ~ label {
+    color: #ffd700;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm review-form">
+                <div class="card-header" style="background-color: #8B4513; color: white;">
+                    <h4 class="card-title mb-0">Buat Penilaian</h4>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        <form method="post" class="rating-form">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Rating</label>
+                                <div class="rating-stars">
+                                    {% for i in '54321'|make_list %}
+                                        <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" required>
+                                        <label for="star{{ i }}" title="{{ i }} stars">
+                                            <i class="fas fa-star"></i>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Ulasan</label>
+                                {{ form.review }}
+                            </div>
+                            <button type="submit" class="rating-btn">
+                                <i class="fas fa-paper-plane"></i> Kirim Penilaian
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p>Silakan login untuk membuat penilaian.</p>
+                            <a href="{% url 'login' %}" class="rating-btn text-decoration-none">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

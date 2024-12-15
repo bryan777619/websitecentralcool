@@ -1,0 +1,65 @@
+[
+    {
+      "model": "reservasi.acproblem",
+      "pk": 1,
+      "fields": {
+        "description": "udara_ac_kecil"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 2,
+      "fields": {
+        "description": "ac_kurang_dingin"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 3,
+      "fields": {
+        "description": "ac_mengeluarkan_bau"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 4,
+      "fields": {
+        "description": "genangan_air_didalam_kabin"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 5,
+      "fields": {
+        "description": "freon_cepat_habis"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 6,
+      "fields": {
+        "description": "suhu_ac_cepat_berubah"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 7,
+      "fields": {
+        "description": "bunyi_menggeram_dari_kap_mobil"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 8,
+      "fields": {
+        "description": "mesin_mobil_overheat"
+      }
+    },
+    {
+      "model": "reservasi.acproblem",
+      "pk": 9,
+      "fields": {
+        "description": "muncul_tetesan_oli_freon"
+      }
+    }
+  ]

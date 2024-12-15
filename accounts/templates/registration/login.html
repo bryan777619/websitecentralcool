@@ -1,0 +1,34 @@
+{% extends "base_auth.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login - Bengkel AC Mobil Central Cool{% endblock %}
+
+{% block form_title %}Masuk ke Akun Anda{% endblock %}
+
+{% block form_fields %}
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="id_username" name="username" placeholder="Username" required>
+    <label for="id_username">Username</label>
+    <i class="fas fa-user form-control-icon"></i>
+</div>
+<div class="form-floating mb-3">
+    <input type="password" class="form-control" id="id_password" name="password" placeholder="Password" required>
+    <label for="id_password">Password</label>
+    <i class="fas fa-lock form-control-icon"></i>
+</div>
+{% endblock %}
+
+{% block submit_button %}
+<i class="fas fa-sign-in-alt me-2"></i>Masuk
+{% endblock %}
+
+{% block alternate_action %}
+Belum punya akun? <a href="{% url 'signup' %}" class="auth-link">Daftar di sini</a>
+{% endblock %}
+
+{% block benefits_title %}Keuntungan Masuk{% endblock %}
+
+{% block benefits_list %}
+<li>Reservasi Perbaikan Secara Online</li>
+<li>Fitur Rekomendasi Perawatan yang Mampu Memprediksi Jenis Layanan Bagi Kendaraan Anda</li>
+{% endblock %}

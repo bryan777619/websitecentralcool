@@ -1,0 +1,61 @@
+{% extends "base_reservasi.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Buat Reservasi - Central Cool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Buat Reservasi Baru</h2>
+                
+                {% if form.errors %}
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ error }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-calendar-check"></i> Buat Reservasi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tanggalInput = document.querySelector('input[name="tanggal"]');
+        const waktuInput = document.querySelector('input[name="waktu"]');
+        
+        tanggalInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            if (selectedDate.getDay() === 0) {
+                alert('Mohon maaf, bengkel tutup di hari Minggu. Silakan pilih hari Senin sampai Sabtu untuk reservasi.');
+                this.value = '';
+            }
+        });
+    
+        // Add time input validation
+        waktuInput.addEventListener('change', function() {
+            const selectedTime = this.value;
+            if (selectedTime < '09:00' || selectedTime > '16:00') {
+                alert('Reservasi hanya dapat dilakukan antara jam 09:00 hingga 16:00.');
+                this.value = '';
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <!-- Card Header with improved contrast -->
+                <div class="card-header bg-primary text-white d-flex align-items-center position-relative py-3">
+                    {% if remaining_uses > 0 %}
+                    <div class="position-absolute" style="left: 1rem;">
+                        <a href="{% url 'home' %}" class="btn btn-light btn-sm rounded-circle">
+                            <i class="fas fa-arrow-left text-primary"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                    <div class="text-center w-100">
+                        <h4 class="mb-0 fw-bold">
+                            <i class="fas fa-snowflake me-2"></i>
+                            Rekomendasi Perawatan AC
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    {% if remaining_uses > 0 %}
+                        <!-- Usage Info with improved design -->
+                        <div class="alert alert-info border-2 d-flex align-items-center mb-4">
+                            <i class="fas fa-info-circle fs-4 me-3 text-primary"></i>
+                            <div>
+                                <strong class="text-primary">Info Penggunaan:</strong><br>
+                                Sisa kuota diagnosa: <span class="badge bg-primary">{{ remaining_uses }} dari 5 kali</span>
+                            </div>
+                        </div>
+
+                        <!-- Form structure remains the same but with improved styling -->
+                        <form method="POST" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- AC Problems Section -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">
+                                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                    Masalah yang Dialami (Pilih 1-3 masalah)
+                                </label>
+                                <div class="border rounded p-3 bg-light">
+                                    {% for problem in form.problems.field.queryset %}
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input problem-checkbox" type="checkbox" 
+                                               name="problems" value="{{ problem.id }}" 
+                                               id="problem_{{ problem.id }}">
+                                        <label class="form-check-label" for="problem_{{ problem.id }}">
+                                            {{ problem.description }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <small class="text-muted">Maksimal 3 masalah yang dapat dipilih</small>
+                            </div>
+
+                            <!-- Vehicle Type -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">
+                                    <i class="fas fa-car me-2 text-primary"></i>
+                                    Jenis Mobil
+                                </label>
+                                {{ form.car_type }}
+                            </div>
+
+                            <!-- Vehicle Brand -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">
+                                    <i class="fas fa-trademark me-2 text-primary"></i>
+                                    Merek Mobil
+                                </label>
+                                {{ form.car_brand }}
+                            </div>
+
+                            <!-- Submit Button with improved styling -->
+                            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
+                                <i class="fas fa-search me-2"></i>
+                                Analisis Masalah AC
+                            </button>
+                        </form>
+                    {% else %}
+                        <!-- Improved usage limit message -->
+                        <div class="alert alert-warning border-0 shadow-sm">
+                            <div class="text-center p-4">
+                                <i class="fas fa-exclamation-circle fs-1 text-warning mb-3"></i>
+                                <h5 class="alert-heading fw-bold">Batas Penggunaan Tercapai</h5>
+                                <p class="mb-2">Anda telah mencapai batas maksimal 5 kali penggunaan fitur rekomendasi perawatan.</p>
+                                <small class="text-muted d-block mb-3">Anda Dapat Menggunakan Fitur Rekomendasi Perawatan Kembali Disaat Anda Telah Membuat Reservasi Perbaikan Baru.</small>
+                                <a href="{% url 'home' %}" class="btn btn-warning">
+                                    <i class="fas fa-home me-2"></i>Kembali ke Beranda
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Tambahkan setelah form dan sebelum hasil rekomendasi -->
+                    <div class="card shadow-lg border-0 mt-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2"></i>
+                                Riwayat Prediksi
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if prediction_history %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="px-4">No.</th>
+                                            <th>Masalah</th>
+                                            <th>Jenis Mobil</th>
+                                            <th>Merek Mobil</th>
+                                            <th>Prediksi Layanan</th>
+                                            <th class="text-center">Waktu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for history in prediction_history %}
+                                        <tr>
+                                            <td class="px-4">{{ forloop.counter }}</td>
+                                            <td>
+                                                <ul class="list-unstyled mb-0">
+                                                    {% for problem in history.problems %}
+                                                    <li><small>• {{ problem }}</small></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                            <td>{{ history.car_type }}</td>
+                                            <td>{{ history.car_brand }}</td>
+                                            <td>
+                                                <ul class="list-unstyled mb-0">
+                                                    {% for service in history.predicted_services %}
+                                                    <li><small>• {{ service|title }}</small></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                            <td class="text-center">
+                                                <small class="text-muted">
+                                                    {{ history.created_at|date:"d/m/Y H:i" }}
+                                                </small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center p-4">
+                                <i class="fas fa-history text-muted mb-3" style="font-size: 2rem;"></i>
+                                <p class="text-muted mb-0">Belum ada riwayat prediksi</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Results Section remains unchanged -->
+                    {% if recommendation_result %}
+                    <div class="mt-5">
+                        <div class="card border-0 shadow">
+                            <!-- Result Header -->
+                            <div class="card-header bg-success text-white p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Hasil Diagnosa AC
+                                    </h5>
+                                    <a href="{% url 'export_recommendation_pdf' recommendation.id %}" 
+                                       class="btn btn-light btn-sm">
+                                        <i class="fas fa-file-pdf me-2"></i>Export Hasil
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Car Info -->
+                            <div class="p-3 bg-light border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-car me-2 text-primary"></i>
+                                    <div>
+                                        <span class="fw-bold text-secondary">Mobil:</span>
+                                        <span class="ms-2">{{ car_brand.name }} - {{ car_type.name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Results Display -->
+                            {% for result in results %}
+                            <div class="p-4 {% if not forloop.last %}border-bottom{% endif %}">
+                                <div class="mb-3">
+                                    <h6 class="text-primary mb-2">Masalah #{{ forloop.counter }}</h6>
+                                    <p class="fw-bold mb-3">{{ result.problem }}</p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h6 class="text-success mb-2">
+                                        <i class="fas fa-tools me-2"></i>
+                                        Rekomendasi Layanan
+                                    </h6>
+                                    <p class="fs-5 fw-bold text-success mb-3">{{ result.service }}</p>
+                                    <p class="mb-0">{{ result.description }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <!-- Disclaimer -->
+                            <div class="p-4 bg-light">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-info-circle text-warning fs-4 me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="text-warning mb-2">INFORMASI PENTING</h6>
+                                    <p class="mb-0 small">{{ disclaimer }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.problem-checkbox');
+    const maxProblems = 3;
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedBoxes = document.querySelectorAll('.problem-checkbox:checked');
+            
+            if (checkedBoxes.length > maxProblems) {
+                this.checked = false;
+                alert('Maksimal 3 masalah yang dapat dipilih');
+            }
+
+            if (checkedBoxes.length >= maxProblems) {
+                checkboxes.forEach(cb => {
+                    if (!cb.checked) {
+                        cb.disabled = true;
+                    }
+                });
+            } else {
+                checkboxes.forEach(cb => {
+                    cb.disabled = false;
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

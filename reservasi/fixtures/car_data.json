@@ -1,0 +1,86 @@
+[
+    {
+      "model": "reservasi.cartype",
+      "pk": 1,
+      "fields": {
+        "name": "mpv"
+      }
+    },
+    {
+      "model": "reservasi.cartype",
+      "pk": 2,
+      "fields": {
+        "name": "sedan"
+      }
+    },
+    {
+      "model": "reservasi.cartype",
+      "pk": 3,
+      "fields": {
+        "name": "hatchback"
+      }
+    },
+    {
+      "model": "reservasi.cartype",
+      "pk": 4,
+      "fields": {
+        "name": "suv"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 1,
+      "fields": {
+        "name": "isuzu"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 2,
+      "fields": {
+        "name": "daihatsu"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 3,
+      "fields": {
+        "name": "honda"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 4,
+      "fields": {
+        "name": "toyota"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 5,
+      "fields": {
+        "name": "nissan"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 6,
+      "fields": {
+        "name": "mazda"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 7,
+      "fields": {
+        "name": "mitsubishi"
+      }
+    },
+    {
+      "model": "reservasi.carbrand",
+      "pk": 8,
+      "fields": {
+        "name": "suzuki"
+      }
+    }
+  ]

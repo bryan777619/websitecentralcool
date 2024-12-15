@@ -1,0 +1,201 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/testimoni.css' %}">
+    <title>{% block title %}Bengkel AC Mobil Central Cool{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+
+        .testimoni-card {
+            transition: all 0.3s ease;
+            border: 2px solid var(--accent-color);
+            background: white;
+        }
+
+        .testimoni-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .rating-display {
+            color: #ffd700;
+        }
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #DEB887;
+            --accent-color: #CD853F;
+            --bg-color: #FDF5E6;
+            --text-dark: #3E2723;
+            --text-light: #FDF5E6;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--accent-color);
+            color: var(--text-light);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+        }
+
+        .card-title {
+            color: var(--primary-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            padding: 20px 0;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .nav-bar {
+            background-color: var(--secondary-color);
+            padding: 15px 0;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .nav-link {
+            color: var(--text-dark) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin: 0 15px;
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary-color);
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-reservasi {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            padding: 12px 25px;
+            border: 2px solid var(--accent-color);
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-reservasi:hover {
+            background-color: var(--accent-color);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid var(--accent-color);
+            object-fit: cover;
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+            margin-top: 20px;
+        }
+
+        .vintage-border {
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 20px;
+            background-color: rgba(139, 69, 19, 0.1);
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 1.8rem;
+            }
+
+            .logo-container {
+                width: 100px;
+                height: 100px;
+            }
+
+            .nav-link {
+                font-size: 1rem;
+                margin: 5px;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="container text-center">
+            <div class="logo-container mb-3">
+                <img src="{% static 'img/Central Cool.png' %}" alt="Logo Central Cool" class="logo">
+            </div>
+            <h1 class="main-title text-light">Bengkel AC Mobil Central Cool</h1>
+            <p class="text-light" style="font-style: italic;">Est. 2012</p>
+        </div>
+    </header>
+
+    <main class="container py-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer mt-5" style="background-color: var(--primary-color); color: var(--text-light); padding: 40px 0;">
+        <div class="container text-center">
+            <div class="vintage-border">
+                <h3>Central Cool</h3>
+                <p>Melayani Sejak 2012</p>
+                <p>Jl. Kembang Kerep No.88 B, Jakarta Barat</p>
+                <p>Telp: 085283295909</p>
+            </div>
+            <p>&copy; 2024 Central Cool. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

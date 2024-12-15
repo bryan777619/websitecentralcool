@@ -1,0 +1,314 @@
+{% extends "base_reservasi.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow border-0" style="background: #f8f9fa;">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h2 class="card-title vintage-text mb-1">Selamat datang, {{ user.nama }}!</h2>
+                        <div class="vintage-line"></div>
+                    </div>
+                    
+                    <div class="user-info mb-4 p-3 bg-white rounded shadow-sm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><i class="fas fa-user me-2 text-muted"></i> {{ user.username }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><i class="fas fa-phone me-2 text-muted"></i> {{ user.nomor_telepon }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="vintage-subtitle mb-3">Reservasi Pelanggan</h3>
+                    {% if user_reservations %}
+                        <div class="table-responsive">
+                            <table class="table table-hover bg-white">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Waktu</th>
+                                        <th>Layanan</th>
+                                        <th>Status</th>
+                                        <th>Pembayaran</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reservasi in user_reservations|slice:":5" %}
+                                    <tr>
+                                        <td>{{ reservasi.tanggal }}</td>
+                                        <td>{{ reservasi.waktu }}</td>
+                                        <td>{{ reservasi.layanan }}</td>
+                                        <td>
+                                            {% if reservasi.is_cancelled %}
+                                                <span class="badge bg-danger">Dibatalkan</span>
+                                            {% else %}
+                                                {% if reservasi.status == 'Dalam Perbaikan' %}
+                                                    <span class="badge bg-dalam-perbaikan">{{ reservasi.status }}</span>
+                                                {% elif reservasi.status == 'Selesai' %}
+                                                    <span class="badge bg-selesai">{{ reservasi.status }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-{{ reservasi.status|lower }}">{{ reservasi.status }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if reservasi.status == 'Selesai' %}
+                                                {% if reservasi.nominal_pembayaran %}
+                                                    <span class="badge bg-info">Rp {{ reservasi.nominal_pembayaran|floatformat:0|intcomma }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Menunggu Input Admin</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-secondary">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not reservasi.is_cancelled and reservasi.status != 'Selesai' %}
+                                                <a href="{% url 'batalkan_reservasi' reservasi.id %}" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-times"></i> Batalkan
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Anda belum memiliki reservasi.
+                        </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'buat_reservasi' %}" class="btn btn-primary vintage-button me-md-2">
+                            <i class="fas fa-calendar-plus me-1"></i> Buat Reservasi
+                        </a>
+                        <a href="{% url 'riwayat_reservasi' %}" class="btn btn-secondary vintage-button me-md-2">
+                            <i class="fas fa-history me-1"></i> Riwayat
+                        </a>
+                        <a href="{% url 'get_recommendation' %}" class="btn btn-info vintage-button">
+                            <i class="fas fa-lightbulb me-1"></i> Rekomendasi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+/* Status badges styling */
+.badge.bg-dalam-perbaikan {
+    background-color: #ffd700 !important;
+    color: #000;
+}
+
+.badge.bg-selesai {
+    background-color: #28a745 !important;
+    color: #fff;
+}
+
+/* Vintage notification styling */
+.vintage-notification {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-family: 'Georgia', serif;
+}
+
+.vintage-notification .notification-header h4 {
+    color: #2c3e50;
+    border-bottom: 2px solid #bdc3c7;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+.vintage-notification .notification-body {
+    padding: 1rem 0;
+}
+
+.vintage-notification .notification-details {
+    background: rgba(255, 255, 255, 0.8);
+    border-left: 4px solid #3498db;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.vintage-notification .notification-details ul {
+    list-style: none;
+    padding-left: 1rem;
+}
+
+.vintage-notification .notification-details li {
+    margin-bottom: 0.5rem;
+    color: #34495e;
+}
+
+.vintage-notification .notification-action {
+    background: #edf2f7;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.vintage-notification .action-text {
+    color: #2c3e50;
+    font-weight: bold;
+    margin: 0;
+}
+
+.vintage-notification .notification-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #bdc3c7;
+    font-style: italic;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* Table styling */
+.table {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    color: #2c3e50;
+    font-family: 'Georgia', serif;
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 4px;
+    font-family: 'Georgia', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Card styling */
+.card {
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.card-title {
+    font-family: 'Georgia', serif;
+    color: #2c3e50;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+.vintage-text {
+    font-family: 'Georgia', serif;
+    color: #2c3e50;
+    letter-spacing: 1px;
+}
+
+.vintage-subtitle {
+    font-family: 'Georgia', serif;
+    color: #34495e;
+    border-bottom: 2px solid #bdc3c7;
+    padding-bottom: 0.5rem;
+}
+
+.vintage-line {
+    height: 2px;
+    background: linear-gradient(to right, transparent, #bdc3c7, transparent);
+    margin: 1rem auto;
+    width: 50%;
+}
+
+.vintage-button {
+    border: none;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.vintage-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.badge {
+    font-weight: normal;
+    padding: 0.5em 0.8em;
+    border-radius: 4px;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.user-info {
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+.badge.bg-info {
+    background-color: #17a2b8 !important;
+    color: white;
+    font-size: 0.9rem;
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.payment-info {
+    font-family: 'Georgia', serif;
+    background-color: #f8f9fa;
+    border-left: 4px solid #17a2b8;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 4px;
+}
+
+.payment-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+</style>
+{% endblock %}

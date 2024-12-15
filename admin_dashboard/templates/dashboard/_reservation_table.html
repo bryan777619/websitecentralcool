@@ -1,0 +1,58 @@
+{% load humanize %}
+{% for reservasi in reservations %}
+<tr>
+    <td>{{ reservasi.user.nama }}</td>
+    <td>{{ reservasi.user.nomor_telepon }}</td>
+    <td>{{ reservasi.tanggal|date:"d M Y" }}</td>
+    <td>{{ reservasi.waktu|time:"H:i" }}</td>
+    <td>
+        <span class="badge {% if reservasi.status == 'Dalam Perbaikan' %}bg-warning{% elif reservasi.status == 'Selesai' %}bg-success{% else %}bg-danger{% endif %}">
+            {{ reservasi.status }}
+        </span>
+    </td>
+    <td>
+        {% if reservasi.status == 'Selesai' %}
+            {% if reservasi.nominal_pembayaran %}
+                <div class="d-flex align-items-center">
+                    <span class="me-2">Rp {{ reservasi.nominal_pembayaran|floatformat:0|intcomma }}</span>
+                    <button class="btn btn-warning btn-sm payment-btn" 
+                            data-reservation-id="{{ reservasi.id }}"
+                            data-csrf-token="{{ csrf_token }}"
+                            data-current-payment="{{ reservasi.nominal_pembayaran }}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            {% else %}
+                <button class="btn btn-primary btn-sm payment-btn" 
+                        data-reservation-id="{{ reservasi.id }}"
+                        data-csrf-token="{{ csrf_token }}">
+                    <i class="fas fa-money-bill"></i> Input Pembayaran
+                </button>
+            {% endif %}
+        {% endif %}
+    </td>
+    <td>
+        {% if reservasi.status == 'Dalam Perbaikan' %}
+            <button class="btn btn-success btn-sm complete-btn"
+                    data-reservation-id="{{ reservasi.id }}"
+                    data-csrf-token="{{ csrf_token }}"
+                    data-current-status="Dalam Perbaikan">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span class="button-text">
+                    <i class="fas fa-check"></i> Selesai
+                </span>
+            </button>
+        {% elif reservasi.status == 'Selesai' %}
+            <button class="btn btn-warning btn-sm edit-btn"
+                    data-reservation-id="{{ reservasi.id }}"
+                    data-csrf-token="{{ csrf_token }}"
+                    data-current-status="Selesai">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span class="button-text">
+                    <i class="fas fa-edit"></i> Edit Status
+                </span>
+            </button>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}

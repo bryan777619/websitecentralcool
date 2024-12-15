@@ -1,0 +1,123 @@
+{% extends "base_auth.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Sign Up - Bengkel AC Mobil Central Cool{% endblock %}
+
+{% block form_title %}Buat Akun Anda{% endblock %}
+
+{% block form_fields %}
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="id_username" name="username" placeholder="Username" required>
+    <label for="id_username">Username</label>
+    <i class="fas fa-user form-control-icon"></i>
+</div>
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="id_nama" name="nama" placeholder="Nama Lengkap" required>
+    <label for="id_nama">Nama Lengkap</label>
+    <i class="fas fa-id-card form-control-icon"></i>
+</div>
+<div class="form-floating mb-3">
+    <input type="tel" class="form-control" id="id_nomor_telepon" name="nomor_telepon" placeholder="Nomor Telepon" required>
+    <label for="id_nomor_telepon">Nomor Telepon</label>
+    <i class="fas fa-phone form-control-icon"></i>
+</div>
+<div class="form-floating mb-3">
+    <input type="password" class="form-control" id="id_password1" name="password1" placeholder="Password" required>
+    <label for="id_password1">Password</label>
+    <i class="fas fa-lock form-control-icon"></i>
+</div>
+<div class="password-strength" id="password-strength"></div>
+<div class="form-floating mb-3">
+    <input type="password" class="form-control" id="id_password2" name="password2" placeholder="Konfirmasi Password" required>
+    <label for="id_password2">Konfirmasi Password</label>
+    <i class="fas fa-lock form-control-icon"></i>
+</div>
+{% endblock %}
+
+{% block submit_button %}
+<i class="fas fa-user-plus me-2"></i>Daftar
+{% endblock %}
+
+{% block alternate_action %}
+Sudah punya akun? <a href="{% url 'login' %}" class="auth-link">Masuk di sini</a>
+{% endblock %}
+
+{% block benefits_title %}Keuntungan Bergabung{% endblock %}
+
+{% block benefits_list %}
+<li>Reservasi Perbaikan Secara Online</li>
+<li>Fitur Rekomendasi Perawatan yang Mampu Memprediksi Jenis Layanan Bagi Kendaraan Anda</li>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('signupForm').addEventListener('submit', function(event) {
+        var password1 = document.getElementById('id_password1').value;
+        var password2 = document.getElementById('id_password2').value;
+        var nomor_telepon = document.getElementById('id_nomor_telepon').value;
+
+        if (password1 !== password2) {
+            event.preventDefault();
+            alert('Kata sandi tidak cocok');
+        }
+
+        if (!/^\d{10,15}$/.test(nomor_telepon)) {
+            event.preventDefault();
+            alert('Nomor telepon tidak valid, harus 10-15 digit.');
+        }
+
+        if (password1.length < 8) {
+            event.preventDefault();
+            alert('Kata sandi harus minimal 8 karakter.');
+        }
+
+        if (!/\d/.test(password1)) {
+            event.preventDefault();
+            alert('Kata sandi harus mengandung setidaknya satu angka.');
+        }
+
+        if (!/[A-Z]/.test(password1)) {
+            event.preventDefault();
+            alert('Kata sandi harus mengandung setidaknya satu huruf besar.');
+        }
+    });
+
+    function checkPasswordStrength(password) {
+        var strength = 0;
+        if (password.length >= 8) strength += 1;
+        if (password.match(/[a-z]+/)) strength += 1;
+        if (password.match(/[A-Z]+/)) strength += 1;
+        if (password.match(/[0-9]+/)) strength += 1;
+        if (password.match(/[$@#&!]+/)) strength += 1;
+
+        var strengthBar = document.getElementById('password-strength');
+        switch (strength) {
+            case 0:
+            case 1:
+                strengthBar.style.width = '20%';
+                strengthBar.style.backgroundColor = '#dc3545';
+                break;
+            case 2:
+                strengthBar.style.width = '40%';
+                strengthBar.style.backgroundColor = '#ffc107';
+                break;
+            case 3:
+                strengthBar.style.width = '60%';
+                strengthBar.style.backgroundColor = '#fd7e14';
+                break;
+            case 4:
+                strengthBar.style.width = '80%';
+                strengthBar.style.backgroundColor = '#20c997';
+                break;
+            case 5:
+                strengthBar.style.width = '100%';
+                strengthBar.style.backgroundColor = '#198754';
+                break;
+        }
+    }
+
+    document.getElementById('id_password1').addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+    });
+</script>
+{% endblock %}
